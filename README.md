@@ -1,2 +1,3 @@
 # VBA-challenge
-In this VBA challenge, I have used ChatGPT and my cousin Samba who is working as a data analyst to work on certain code and calculation 
+In this VBA challenge, I have used different resources for this VBA Challenge. First, I work on this challenge with Abigail Serpa, my cousin Samba who is working as a data analyst and also we used ChatGPT on debugging certain issues that we were having while running our Macro.
+ For instance, we used ChatGPT to debugged the conditional formating to get negative values in red and positive value in green. Also, we used ChatGPT to make the appropriate adjustments to my VBA script so that it is enable to run on every worksheet. Also, my cousin Samba assited me in debugging few issues.

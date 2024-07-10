@@ -1,0 +1,142 @@
+Sub QuarterlyStockAnalysis()
+
+' Set the intial variables
+
+    Dim ws As Worksheet
+    Dim ticker As String
+    Dim startOpen As Double
+    Dim endClose As Double
+    Dim totalVolume As Double
+    Dim lastRow As Long
+    Dim summaryRow As Long
+    Dim percentChange As Double
+
+    Dim maxIncrease As Double
+    Dim maxDecrease As Double
+    Dim maxVolume As Double
+    Dim maxIncreaseTicker As String
+    Dim maxDecreaseTicker As String
+    Dim maxVolumeTicker As String
+   
+    Dim quarters As Variant
+    Dim quarterName As Variant
+    Dim i As Long
+   
+    ' Initialize max and min values
+    maxIncrease = -1
+    maxDecrease = 1
+    maxVolume = 0
+   
+    ' Array of quarter worksheet names
+    quarters = Array("Q1", "Q2", "Q3", "Q4")
+   
+    ' Loop through each quarter worksheet
+    For Each quarterName In quarters
+        Set ws = ThisWorkbook.Sheets(quarterName)
+       
+        ' Set up the header for the result in the same sheet starting from column I
+        ws.Range("I1").Value = "Ticker"
+        ws.Range("J1").Value = "Quarterly Change"
+        ws.Range("K1").Value = "Percentage Change"
+        ws.Range("L1").Value = "Total Volume"
+       
+        summaryRow = 2
+        lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+       
+        ' Initialize max and min values for the quarter
+        maxIncrease = -1
+        maxDecrease = 1
+        maxVolume = 0
+       
+        ' Initialize variables for each ticker
+        ticker = ""
+        startOpen = 0
+        endClose = 0
+        totalVolume = 0
+       
+        For i = 2 To lastRow
+            If ws.Cells(i, 1).Value <> ticker Then
+                ' If it's a new ticker, save the previous ticker's data
+                If ticker <> "" Then
+                    ' Save the results for the previous ticker
+                    ws.Cells(summaryRow, 9).Value = ticker
+                    ws.Cells(summaryRow, 10).Value = endClose - startOpen
+                    percentChange = (endClose - startOpen) / startOpen
+                    ws.Cells(summaryRow, 11).Value = percentChange
+                    ws.Cells(summaryRow, 12).Value = totalVolume
+                   
+                    ' Set Conditional formatting based on the Quarterly Change value
+                    If ws.Cells(summaryRow, 10).Value > 0 Then
+                        ws.Cells(summaryRow, 10).Interior.Color = RGB(0, 255, 0) ' Green color
+                    ElseIf ws.Cells(summaryRow, 10).Value < 0 Then
+                        ws.Cells(summaryRow, 10).Interior.Color = RGB(255, 0, 0) ' Red color
+                    End If
+                   
+                    ' Check for max increase, decrease, and volume
+                    If percentChange > maxIncrease Then
+                        maxIncrease = percentChange
+                        maxIncreaseTicker = ticker
+                    End If
+                    If percentChange < maxDecrease Then
+                        maxDecrease = percentChange
+                        maxDecreaseTicker = ticker
+                    End If
+                    If totalVolume > maxVolume Then
+                        maxVolume = totalVolume
+                        maxVolumeTicker = ticker
+                    End If
+                   
+                    summaryRow = summaryRow + 1
+                End If
+               
+                ' Update the ticker and initialize values
+                ticker = ws.Cells(i, 1).Value
+                startOpen = ws.Cells(i, 3).Value
+                totalVolume = 0
+            End If
+           
+            ' Update the end closing price and total volume
+            endClose = ws.Cells(i, 6).Value
+            totalVolume = totalVolume + ws.Cells(i, 7).Value
+        Next i
+       
+        ' Save the last ticker's data
+        If ticker <> "" Then
+            ws.Cells(summaryRow, 9).Value = ticker
+            ws.Cells(summaryRow, 10).Value = endClose - startOpen
+            percentChange = (endClose - startOpen) / startOpen
+            ws.Cells(summaryRow, 11).Value = percentChange
+            ws.Cells(summaryRow, 12).Value = totalVolume
+           
+            ' Check for max increase, decrease, and volume
+            If percentChange > maxIncrease Then
+                maxIncrease = percentChange
+                maxIncreaseTicker = ticker
+            End If
+            If percentChange < maxDecrease Then
+                maxDecrease = percentChange
+                maxDecreaseTicker = ticker
+            End If
+            If totalVolume > maxVolume Then
+                maxVolume = totalVolume
+                maxVolumeTicker = ticker
+            End If
+           
+            summaryRow = summaryRow + 1
+        End If
+       
+        ' Output the max increase, decrease, and volume to the result area in the same sheet
+        ws.Cells(1, 14).Value = ""
+        ws.Cells(2, 14).Value = "Greatest % Increase"
+        ws.Cells(3, 14).Value = "Greatest % Decrease"
+        ws.Cells(4, 14).Value = "Greatest Total Volume"
+        ws.Cells(1, 15).Value = "Ticker"
+        ws.Cells(1, 16).Value = "Value"
+        ws.Cells(2, 15).Value = maxIncreaseTicker
+        ws.Cells(2, 16).Value = Format(maxIncrease, "0.00%")
+        ws.Cells(3, 15).Value = maxDecreaseTicker
+        ws.Cells(3, 16).Value = Format(maxDecrease, "0.00%")
+        ws.Cells(4, 15).Value = maxVolumeTicker
+        ws.Cells(4, 16).Value = maxVolume
+    Next quarterName
+End Sub
